@@ -52,7 +52,7 @@ void mem_init(struct boot_info *boot_info)
 	npages = MIN(BOOT_MAP_LIM, highest_addr) / PAGE_SIZE;
 
 	/* Remove this line when you're ready to test this function. */
-	panic("mem_init: This function is not finished\n");
+	//panic("mem_init: This function is not finished\n");
 
 	/*
 	 * Allocate an array of npages 'struct page_info's and store it in 'pages'.
@@ -97,6 +97,12 @@ void page_init(struct boot_info *boot_info)
 	 */
 	for (i = 0; i < npages; ++i) {
 		/* LAB 1: your code here. */
+		page = pages + i;
+		list_init(&page->pp_node);
+		page->pp_ref = 0;
+		page->pp_free = 0;
+		page->pp_order = 0;
+		
 	}
 
 	entry = (struct mmap_entry *)KADDR(boot_info->mmap_addr);
@@ -116,6 +122,23 @@ void page_init(struct boot_info *boot_info)
 	 */
 	for (i = 0; i < boot_info->mmap_len; ++i, ++entry) {
 		/* LAB 1: your code here. */
+		if (entry->type == MMAP_FREE){
+			for (pa = entry->addr; pa < entry->addr + entry->len; pa += PAGE_SIZE) {
+
+				if (pa < BOOT_MAP_LIM){
+					if ((pa == 0 ||
+						pa == PAGE_ADDR(PADDR(boot_info)) ||
+						pa == (uintptr_t)boot_info->elf_hdr ||
+						(pa >= KERNEL_LMA && pa < end))) {
+							continue;
+						}else{
+							// page can be managed by buddy allocator
+							// we use reserved member to identify the page is managed by buddy allocator, its for invalid free check purpose
+							page_free(pa2page(pa));
+						}
+				}
+			}
+		}
 	}
 }
 

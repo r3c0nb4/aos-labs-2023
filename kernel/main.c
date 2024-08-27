@@ -27,6 +27,7 @@ void kmain(struct boot_info *boot_info)
 	/* Drop into the kernel monitor. */
 	while (1)
 		monitor(NULL);
+	while (1){}
 }
 
 /*

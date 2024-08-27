@@ -38,7 +38,11 @@ void *boot_alloc(uint32_t n)
 	 *
 	 * LAB 1: your code here.
 	 */
-	return NULL;
+	result = next_free;
+	if(n){
+		next_free = ROUNDUP(next_free + n,  PAGE_SIZE);
+	}
+	return result;
 }
 
 /* The addresses and lengths in the memory map provided by the boot loader may
